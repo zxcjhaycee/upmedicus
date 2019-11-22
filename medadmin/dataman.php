@@ -67,13 +67,13 @@ include('navbar.php');
         <div class="modal-body">
           <center>
           <p>English Title</p>
-                <input type="text" value="Diligan ang Hardin ni Nene" style="width: 95%;"> <br>
+                <input type="text" style="width: 95%;"> <br>
               <p>Record type</p>
-                <input type="text" value="Action" style="width: 95%;"> <br>
+                <input type="text" style="width: 95%;"> <br>
                 <p>Personal Author</p>
-                <input type="text" value="Erap, FPJ, Eddie Garcia, Robin, Bayani, Long Mejia" style="width: 95%;"> <br>
+                <input type="text" style="width: 95%;"> <br>
               <p>Publisher</p>
-                <input type="text" value="Andrew the bulldog" style="width: 95%;"> <br>
+                <input type="text"style="width: 95%;"> <br>
                 <div style="height: 30px;">
               <p>Abstract</p>
                 <textarea class="form-control" rows="5" required="true" style="resize: none; width: 95%;"></textarea> </div><br>

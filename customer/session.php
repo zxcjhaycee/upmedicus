@@ -8,9 +8,9 @@ if (!isset($_SESSION['usertype'])) {
 }
 
 	if ($_SESSION['usertype'] == 'Admin') {
-	  header('Location: ../medadmin/home.php');
+	  header('Location: ../medadmin/index.php');
 
-		}
+	}
 
 	  
 	

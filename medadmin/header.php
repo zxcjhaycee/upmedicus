@@ -21,7 +21,7 @@ header("Location: ../customer/index.php",TRUE,301);
 <link href="css/font-awesome.css" rel="stylesheet">
 <link href="css/style.css" rel="stylesheet">
 <link href="css/pages/dashboard.css" rel="stylesheet">
-<script src="vendor/jquery/jquery-3.3.1.min.js"></script>
+<script src="../vendor/jquery/jquery-3.3.1.min.js"></script>
 <link href="css/bootstrap-select.min.css" rel="stylesheet">
 <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
 <!--[if lt IE 9]>
