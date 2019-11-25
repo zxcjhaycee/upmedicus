@@ -19,59 +19,77 @@
   <div class="subnavbar-inner">
     <div class="container">
       <ul class="mainnav">
-         <?php if($title=="Dashboard"){ 
+         <?php
+         echo $title == 'Dashboard' ? '<li class="active">' : '<li>';
+        /* 
+          if($title=="Dashboard"){ 
+           echo '<li class="active">'; }
+          else {
+           echo "<li>"; 
+          } 
+           */
+          echo '<a href="index.php"><i class="icon-dashboard"></i><span>Dashboard</span></a></li>';
+          /*         
+         if($title=="Dataman"){ 
           echo '<li class="active">'; }
           else {
            echo "<li>";
           
-        } ?>
-        <a href="index.php"><i class="icon-dashboard"></i><span>Dashboard</span> </a> </li>
-         <?php if($title=="Dataman"){ 
-          echo '<li class="active">'; }
-          else {
-           echo "<li>";
-          
-        } ?>
-        <a href="dataman.php"><i class="icon-tasks"></i><span>Data Management</span> </a> </li>
+        } 
+         */
+      //  echo '<a href="dataman.php"><i class="icon-tasks"></i><span>Data Management</span> </a> </li>';
 
-        <?php if($title=="Users"){ 
-          echo '<li class="active">'; }
-          else {
-           echo "<li>";
-          
-        } ?>
-        <a href="users.php"><i class="icon-user"></i><span>User Accounts</span> </a> </li>
-        
-         <?php if($title=="Cataloging"){ 
-          echo '<li class="active">'; }
-          else {
-           echo "<li>";
-          
-        } ?>
-        <a href="cataloging.php"><i class="icon-book"></i><span>Cataloging</span> </a> </li>
-         <?php if($title=="Reports"){ 
-          echo '<li class="active">'; }
-          else {
-           echo "<li>";
-          
-        } ?>
-        
-        <a href="messages.php"><i class="icon-envelope"></i><span>Messages</span> </a> </li>
-        <?php if($title=="Profile"){ 
-          echo '<li class="active">'; }
-          else {
-           echo "<li>";
-          
-        } ?>
-        <a href="profile.php"><i class="icon-cogs"></i><span>Profile</span> </a> </li>
 
-        <?php if($title=="Logout"){ 
-          echo '<li class="active">'; }
+          echo $title == 'Users' ? '<li class="active">' : '<li>';
+          /*         
+          if($title=="Users"){ 
+           echo '<li class="active">'; }
           else {
            echo "<li>";
-          
-        } ?>
-        <a href="#logout" data-target="#logout" data-toggle="modal"><i class="icon-off"></i><span>Logout</span> </a> </li>
+          } 
+          */
+          echo '<a href="users.php"><i class="icon-user"></i><span>User Accounts</span></a></li>';
+        
+          echo $title == 'Cataloging' ? '<li class="active">' : '<li>';
+          /* 
+          if($title=="Cataloging"){ 
+            echo '<li class="active">'; }
+          else {
+           echo "<li>";
+          } 
+           */
+          echo '<a href="cataloging.php"><i class="icon-book"></i><span>Cataloging</span></a></li>';
+        
+         echo $title == 'Messages' ? '<li class="active">' : '<li>';
+          /*          
+          if($title=="Reports"){ 
+            echo '<li class="active">'; }
+          else {
+           echo "<li>";
+          } 
+          */
+          echo '<a href="messages.php"><i class="icon-envelope"></i><span>Messages</span></a></li>';
+
+          echo $title == 'Profile' ? '<li class="active">' : '<li>';
+          /*         
+          if($title=="Profile"){ 
+           echo '<li class="active">'; }
+          else {
+           echo "<li>";
+          } 
+          */
+          echo '<a href="profile.php"><i class="icon-cogs"></i><span>Profile</span></a></li>';
+
+          echo $title == 'Logout' ? '<li class="active">' : '<li>';
+          /* 
+          if($title=="Logout"){ 
+            echo '<li class="active">'; }
+          else {
+           echo "<li>";
+          }
+           */
+          echo '<a href="#logout" data-target="#logout" data-toggle="modal"><i class="icon-off"></i><span>Logout</span></a></li>';
+          ?>
 
        <!-- Modal -->
 <div id="logout" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

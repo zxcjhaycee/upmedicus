@@ -2,150 +2,170 @@
 require('../dbconnect/dbconnections.php');
 session_start();
 if(isset($_POST['show'])){
-	$recordtype = "";
-	$controlnumber = "";
-	$all2 = "";
-	$all3 = "";
-	$all = "";
-	$santol = "";
 
+	$row_title = array();
+
+	$query_title = "SELECT titleID FROM t_title ORDER BY titleID desc LIMIT 1";
+	$result_title = mysqli_query($conn, $query_title);
+	$num_title = mysqli_num_rows($result_title);
+	$row_title = mysqli_fetch_array($result_title);
+	if($num_title > 0){
+		$row_title['titleID'] += 1;
+	}else{
+		$row_title['titleID'] = 1;
+	}
+	$english_title = mysqli_escape_string($conn,$_POST['englishtitle']);
+	$english_title_delimiter = mysqli_escape_string($conn, $_POST['englishtitledelimeter']);
+	$english_title_value = mysqli_escape_string($conn, $_POST['englishtitlevalue']);
+
+	$title = $english_title_delimiter."".$english_title_value."".$english_title;
+
+	$title_insert = $conn->prepare("INSERT INTO t_title (title, primaryno) VALUES (?,?) ");
+	$title_insert->bind_Param("si", $title, $row_title['titleID']);
+	$title_insert->execute();
+
+	/*
 	$primaryidquery = mysqli_query($conn, "SELECT titleID from t_title ORDER BY titleID desc LIMIT 1");
 	$primaryid = mysqli_fetch_array($primaryidquery);
 	$primaryidno = $primaryid['titleID'];
 	$nno1 = $primaryidno + 1;
 	$primaryno = $nno1;
+	*/
 
-
-			foreach ($_POST['englishtitle'] as $key8 => $value8) {
+	// foreach ($_POST['englishtitle'] as $key => $value) {
+		/*
 		$englishtitle = $_POST['englishtitle'][$key8];
 		$englishtitledelimeter = $_POST['englishtitledelimeter'][$key8];
 		$englishtitlevalue = $_POST['englishtitlevalue'][$key8];
 		$all9 = $englishtitledelimeter."".$englishtitlevalue."".$englishtitle;
 		$santol .= $all9.",";
-
 		$enginsert = $conn->prepare("INSERT INTO t_title (titleID, title, primaryno) VALUES (?, ?, ?)");
 		$enginsert->bind_Param("sss", $primaryno, $all9, $primaryno);
 		$enginsert->execute();
-
-	}
+		*/
+	// }
 			
-			foreach ($_POST['personalauthor'] as $key11 => $value11) {
-		$personalauthor = $_POST['personalauthor'][$key11];
-		$personalauthordelimeter = $_POST['personalauthordelimeter'][$key11];
-		$personalauthorvalue = $_POST['personalauthorvalue'][$key11];
-		$all12 = $personalauthordelimeter."".$personalauthorvalue."".$personalauthor;
-		$santol .= $all12.",";
+	foreach ($_POST['personalauthor'] as $key => $value) {
+		$personal_author = mysqli_escape_string($conn, $_POST['personalauthor'][$key]);
+		$personal_author_delimeter = mysqli_escape_string($conn, $_POST['personalauthordelimeter'][$key]);
+		$personal_author_value = mysqli_escape_string($conn, $_POST['personalauthorvalue'][$key]);
+		$personal_author_all = $personal_author_delimeter."".$personal_author_value."".$personal_author;
+		$persona_author_insert = $conn->prepare("INSERT INTO t_author (author, primaryno) VALUES (?, ?)");
+		$persona_author_insert->bind_Param("si", $personal_author_all, $row_title['titleID']);
+		$persona_author_insert->execute();
 
-		$personalinsert = $conn->prepare("INSERT INTO t_author (author, primaryno) VALUES (?, ?)");
-		$personalinsert->bind_Param("ss", $all12, $primaryno);
-		$personalinsert->execute();
+	}
+
+	foreach ($_POST['sourcedocument'] as $key => $value) {
+		$source_document = mysqli_escape_string($conn, $_POST['sourcedocument'][$key]);
+		$source_document_delimeter = mysqli_escape_string($conn, $_POST['sourcedocumentdelimeter'][$key]);
+		$source_document_value = mysqli_escape_string($conn, $_POST['sourcedocumentvalue'][$key]);
+
+		$source_document_date = mysqli_escape_string($conn, $_POST['sourcedocumentdate'][$key]);
+		$source_document_date_delimeter = mysqli_escape_string($conn, $_POST['sourcedocumentdatedelimeter'][$key]);
+		$source_document_date_value = mysqli_escape_string($conn, $_POST['sourcedocumentdatevalue'][$key]);
+
+		$source_document_page = mysqli_escape_string($conn, $_POST['sourcedocumentpage'][$key]);
+		$source_document_page_delimeter = mysqli_escape_string($conn, $_POST['sourcedocumentpagedelimeter'][$key]);
+		$source_document_page_value = mysqli_escape_string($conn, $_POST['sourcedocumentpagevalue'][$key]);
+
+		$source_document_all = $source_document_delimeter."".$source_document_value."".$source_document;
+		$source_document_date_all = $source_document_date_delimeter."".$source_document_date_value."".$source_document_date;
+		$source_document_page_all = $source_document_page_delimeter."".$source_document_page_value."".$source_document_page;
+
+		$source_document_overall = $source_document_all."".$source_document_date_all."".$source_document_page_all;
+
+		$source_document_insert = $conn->prepare("INSERT INTO t_source (source_document,source_document_date,source_document_page, primaryno) VALUES (?,?,?,?)");
+		$source_document_insert->bind_Param("sssi", $source_document_all,$source_document_date_all,$source_document_page_all,$row_title['titleID']);
+		$source_document_insert->execute();
+
 
 
 	}
-			foreach ($_POST['sourcedocument'] as $key15 => $value15) {
-		$sourcedocument = $_POST['sourcedocument'][$key15];
-		$sourcedocumentdelimeter = $_POST['sourcedocumentdelimeter'][$key15];
-		$sourcedocumentvalue = $_POST['sourcedocumentvalue'][$key15];
-		$sourcedocumentdate = $_POST['sourcedocumentdate'][$key15];
-		$sourcedocumentdatedelimeter = $_POST['sourcedocumentdatedelimeter'][$key15];
-		$sourcedocumentdatevalue = $_POST['sourcedocumentdatevalue'][$key15];
-		$sourcedocumentpage = $_POST['sourcedocumentpage'][$key15];
-		$sourcedocumentpagedelimeter = $_POST['sourcedocumentpagedelimeter'][$key15];
-		$sourcedocumentpagevalue = $_POST['sourcedocumentpagevalue'][$key15];
-		$all16 = $sourcedocumentdelimeter."".$sourcedocumentvalue."".$sourcedocument;
-		$santol .= $all16.",";
-		$alldate = $sourcedocumentdatedelimeter."".$sourcedocumentdatevalue."".$sourcedocumentdate;
-		$allpage = $sourcedocumentpagedelimeter."".$sourcedocumentpagevalue."".$sourcedocumentpage;
-
-		$pub = $all16."".$alldate."".$allpage;
-
-		$sourceinsert = $conn->prepare("INSERT INTO t_source (source, primaryno) VALUES (?, ?)");
-		$sourceinsert->bind_Param("ss", $pub, $primaryno);
-		$sourceinsert->execute();
 
 
+	// foreach ($_POST['encoder'] as $key20 => $value20) {
+		$encoder = mysqli_escape_string($conn, $_POST['encoder']);
+		$encoder_delimiter = mysqli_escape_string($conn, $_POST['encoderdelimeter']);
+		$encoder_value = mysqli_escape_string($conn, $_POST['encodervalue']);
+		$encoder_all = $encoder_delimiter."".$encoder_value."".$encoder;
 
-	}
-			foreach ($_POST['encoder'] as $key20 => $value20) {
-		$encoder = $_POST['encoder'][$key20];
-		$encoderdelimeter = $_POST['encoderdelimeter'][$key20];
-		$encodervalue = $_POST['encodervalue'][$key20];
-		$all21 = $encoderdelimeter."".$encodervalue."".$encoder;
-		$santol .= $all21.",";
-		$encoderinsert = $conn->prepare("INSERT INTO t_encoder (encoder, primaryno) VALUES (?, ?)");
-		$encoderinsert->bind_Param("ss", $all21, $primaryno);
-		$encoderinsert->execute();
+		$encoder_insert = $conn->prepare("INSERT INTO t_encoder (encoder, primaryno) VALUES (?, ?)");
+		$encoder_insert->bind_Param("ss", $encoder_all, $row_title['titleID']);
+		$encoder_insert->execute();
 
-	}
-			foreach ($_POST['physicalclassification'] as $key21 => $value21) {
-		$physicalclassification = $_POST['physicalclassification'][$key21];
-		$physicalclassificationdelimeter = $_POST['physicalclassificationdelimeter'][$key21];
-		$physicalclassificationvalue = $_POST['physicalclassificationvalue'][$key21];
-		$all22 = $physicalclassificationdelimeter."".$physicalclassificationvalue."".$physicalclassification;
-		$santol .= $all22.",";
-		$classinsert = $conn->prepare("INSERT INTO t_phyclass (pc, primaryno) VALUES (?, ?)");
-		$classinsert->bind_Param("ss", $all22, $primaryno);
-		$classinsert->execute();
-	}
-			foreach ($_POST['typeofmaterialdocument'] as $key22 => $value22) {
-		$typeofmaterialdocument = $_POST['typeofmaterialdocument'][$key22];
-		$typeofmaterialdocumentdelimeter = $_POST['typeofmaterialdocumentdelimeter'][$key22];
-		$typeofmaterialdocumentvalue = $_POST['typeofmaterialdocumentvalue'][$key22];
-		$all23 = $typeofmaterialdocumentdelimeter."".$typeofmaterialdocumentvalue."".$typeofmaterialdocument;
-		$santol .= $all23.",";
-		$materialinsert = $conn->prepare("INSERT INTO t_mattype (mattype, primaryno) VALUES (?, ?)");
-		$materialinsert->bind_Param("ss", $all23, $primaryno);
-		$materialinsert->execute();
-	}
-			foreach ($_POST['languageoftext'] as $key23 => $value23) {
-		$languageoftext = $_POST['languageoftext'][$key23];
-		$languageoftextdelimeter = $_POST['languageoftextdelimeter'][$key23];
-		$languageoftextvalue = $_POST['languageoftextvalue'][$key23];
-		$all24 = $languageoftextdelimeter."".$languageoftextvalue."".$languageoftext;
-		$santol .= $all24.",";
-		$langinsert = $conn->prepare("INSERT INTO t_language (language, primaryno) VALUES (?, ?)");
-		$langinsert->bind_Param("ss", $all24, $primaryno);
-		$langinsert->execute();
+	// }
+	foreach ($_POST['physicalclassification'] as $key => $value) {
+		$physical_classification = mysqli_escape_string($conn, $_POST['physicalclassification'][$key]);
+		$physical_classification_delimeter = mysqli_escape_string($conn, $_POST['physicalclassificationdelimeter'][$key]);
+		$physical_classification_value = mysqli_escape_string($conn, $_POST['physicalclassificationvalue'][$key]);
+
+		$physical_classification_all = $physical_classification_delimeter."".$physical_classification_value."".$physical_classification;
+
+		$physical_classification_insert = $conn->prepare("INSERT INTO t_phyclass (pc, primaryno) VALUES (?, ?)");
+		$physical_classification_insert->bind_Param("si", $physical_classification_all, $row_title['titleID']);
+		$physical_classification_insert->execute();
 	}
 
-	foreach ($_POST['subjectheadings'] as $key26 => $value26) {
-		$subjectheadings = $_POST['subjectheadings'][$key26];
-		$subjectheadingsdelimeter = $_POST['subjectheadingsdelimeter'][$key26];
-		$subjectheadingsvalue = $_POST['subjectheadingsvalue'][$key26];
-		$all27 = $subjectheadingsdelimeter."".$subjectheadingsvalue."".$subjectheadings;
-		$santol .= $all27.",";
+	foreach ($_POST['typeofmaterialdocument'] as $key => $value) {
+		$type_of_material_document = mysqli_escape_string($conn, $_POST['typeofmaterialdocument'][$key]);
+		$type_of_material_document_delimeter = mysqli_escape_string($conn, $_POST['typeofmaterialdocumentdelimeter'][$key]);
+		$type_of_material_document_value = mysqli_escape_string($conn, $_POST['typeofmaterialdocumentvalue'][$key]);
 
-		$subjinsert = $conn->prepare("INSERT INTO t_subject (subject, primaryno) VALUES (?, ?)");
-		$subjinsert->bind_Param("ss", $all27, $primaryno);
-		$subjinsert->execute();
+		$type_of_material_document_all = $type_of_material_document_delimeter."".$type_of_material_document_value."".$type_of_material_document;
 
+		$type_of_material_document_insert = $conn->prepare("INSERT INTO t_mattype (mattype, primaryno) VALUES (?, ?)");
+		$type_of_material_document_insert->bind_Param("si", $type_of_material_document_all, $row_title['titleID']);
+		$type_of_material_document_insert->execute();
+	}
+
+	foreach ($_POST['languageoftext'] as $key => $value) {
+		$language_of_text = mysqli_escape_string($conn, $_POST['languageoftext'][$key]);
+		$language_of_text_delimeter = mysqli_escape_string($conn, $_POST['languageoftextdelimeter'][$key]);
+		$language_of_text_value = mysqli_escape_string($conn, $_POST['languageoftextvalue'][$key]);
+
+		$language_of_text_all = $language_of_text_delimeter."".$language_of_text_value."".$language_of_text;
+
+		$language_of_text_insert = $conn->prepare("INSERT INTO t_language (language, primaryno) VALUES (?, ?)");
+		$language_of_text_insert->bind_Param("si", $language_of_text_all, $row_title['titleID']);
+		$language_of_text_insert->execute();
+	}
+
+	foreach ($_POST['subjectheadings'] as $key => $value) {
+		$subject_headings = mysqli_escape_string($conn, $_POST['subjectheadings'][$key]);
+		$subject_headings_delimeter = mysqli_escape_string($conn, $_POST['subjectheadingsdelimeter'][$key]);
+		$subject_headings_value = mysqli_escape_string($conn, $_POST['subjectheadingsvalue'][$key]);
+
+		$subject_headings_all = $subject_headings_delimeter."".$subject_headings_value."".$subject_headings;
+
+		$subject_headings_insert = $conn->prepare("INSERT INTO t_subject (subject, primaryno) VALUES (?, ?)");
+		$subject_headings_insert->bind_Param("si", $subject_headings_all, $row_title['titleID']);
+		$subject_headings_insert->execute();
 
 	}
 		
-		foreach ($_POST['keywords'] as $key27 => $value27) {
-		$keywords = $_POST['keywords'][$key27];
-		$keywordsdelimeter = $_POST['keywordsdelimeter'][$key27];
-		$keywordsvalue = $_POST['keywordsvalue'][$key27];
-		$all28 = $keywordsdelimeter."".$keywordsvalue."".$keywords;
-		$santol .= $all28.",";
+	foreach ($_POST['keywords'] as $key => $value) {
+		$keywords = mysqli_escape_string($conn, $_POST['keywords'][$key]);
+		$keywords_delimeter = mysqli_escape_string($conn, $_POST['keywordsdelimeter'][$key]);
+		$keywords_value = mysqli_escape_string($conn, $_POST['keywordsvalue'][$key]);
+		$keywords_all = $keywords_delimeter."".$keywords_value."".$keywords;
 
-		$keywordsinsert = $conn->prepare("INSERT INTO t_keyword (keyword, primaryno) VALUES (?, ?)");
-		$keywordsinsert->bind_Param("ss", $all28, $primaryno);
-		$keywordsinsert->execute();
+		$keywords_insert = $conn->prepare("INSERT INTO t_keyword (keyword, primaryno) VALUES (?, ?)");
+		$keywords_insert->bind_Param("si", $keywords_all, $row_title['titleID']);
+		$keywords_insert->execute();
 
 
 	}
 
-			foreach ($_POST['abstract'] as $key25 => $value25) {
-		$abstract = $_POST['abstract'][$key25];
-		$abstractdelimeter = $_POST['abstractdelimeter'][$key25];
-		$abstractvalue = $_POST['abstractvalue'][$key25];
-		$all26 = $abstractdelimeter."".$abstractvalue."".$abstract;
-		$santol .= $all26.",";
+	foreach ($_POST['abstract'] as $key => $value) {
+		$abstract = mysqli_escape_string($conn, $_POST['abstract'][$key]);
+		$abstract_delimeter = mysqli_escape_string($conn, $_POST['abstractdelimeter'][$key]);
+		$abstract_value = mysqli_escape_string($conn, $_POST['abstractvalue'][$key]);
+		$abstract_all = $abstract_delimeter."".$abstract_value."".$abstract;
 
-		$abstractinsert = $conn->prepare("INSERT INTO t_abstract (abstract, primaryno) VALUES (?, ?)");
-		$abstractinsert->bind_Param("ss", $all26, $primaryno);
-		$abstractinsert->execute();
+		$abstract_insert = $conn->prepare("INSERT INTO t_abstract (abstract, primaryno) VALUES (?, ?)");
+		$abstract_insert->bind_Param("si", $abstract_all, $row_title['titleID']);
+		$abstract_insert->execute();
 
 	}
 

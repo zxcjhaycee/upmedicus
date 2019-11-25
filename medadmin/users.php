@@ -15,8 +15,14 @@ include('navbar.php');
     <div class="main-inner">
 
       <center>
+     <?php
+       $file_name = basename($_SERVER["SCRIPT_FILENAME"]);
+       echo $file_name == 'users.php' ? '<a href="users2.php" class="btn btn-success">Registered Accounts</a>' : '<a href="users.php" class="btn btn-success">Create New Account</a>';
+      ?>
+        <!-- 
         <a href="users.php" class="btn btn-success">Create New Account</a>
         <a href="users2.php" class="btn btn-success">Registered Accounts</a>
+         -->
       </center>
 <br>
 

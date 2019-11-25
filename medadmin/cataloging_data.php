@@ -28,9 +28,9 @@ if(isset($_POST['show'])){
                        <tr>
                         <td></td>
                         <td><button type="button" class="btn btn-info btn-mini" href="#view" data-target="#englishtitleview" data-toggle="modal"><i class="icon-small icon-fullscreen"></i></button>&nbsp; ENGLISH TITLE</td>
-                        <td><input type="text" name="englishtitledelimeter[]" value="#" maxlength="2" /></td>
-                        <td><input type="text" name="englishtitlevalue[]" value="00$a"></td>
-                        <td><input type="text" name="englishtitle[]"></td>
+                        <td><input type="text" name="englishtitledelimeter" value="#" maxlength="2" /></td>
+                        <td><input type="text" name="englishtitlevalue" value="00$a"></td>
+                        <td><input type="text" name="englishtitle"></td>
                       </td>
                       </tr>
                       <?php
@@ -77,9 +77,9 @@ if(isset($_POST['show'])){
                        <tr>
                         <td></td>
                         <td><button type="button" class="btn btn-info btn-mini" href="#view" data-target="#encoderview" data-toggle="modal"><i class="icon-small icon-fullscreen"></i></button>&nbsp; ENCODER</td>
-                        <td><input type="text" readonly name="encoderdelimeter[]" value="#" maxlength="2" /></td>
-                        <td><input type="text" readonly name="encodervalue[]" value="00$a"></td>
-                        <td><input type="text" readonly value="<?php echo ucfirst($username); ?>" name="encoder[]"></td>
+                        <td><input type="text" readonly name="encoderdelimeter" value="#" maxlength="2" /></td>
+                        <td><input type="text" readonly name="encodervalue" value="00$a"></td>
+                        <td><input type="text" readonly value="<?php echo ucfirst($username); ?>" name="encoder"></td>
                       </tr>
                         <?php
                           while($physical_classification_counter <= $_POST['fieldStorage']['physical_classification']){
