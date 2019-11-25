@@ -102,7 +102,7 @@ if(isset($_POST['show'])){
 
 		$physical_classification_all = $physical_classification_delimeter."".$physical_classification_value."".$physical_classification;
 
-		$physical_classification_insert = $conn->prepare("INSERT INTO t_phyclass (pc, primaryno) VALUES (?, ?)");
+		$physical_classification_insert = $conn->prepare("INSERT INTO t_phyclass (phyclass, primaryno) VALUES (?, ?)");
 		$physical_classification_insert->bind_Param("si", $physical_classification_all, $row_title['titleID']);
 		$physical_classification_insert->execute();
 	}

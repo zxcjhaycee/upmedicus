@@ -113,41 +113,196 @@ function searchAllDB($search,$criteria){
     $result = mysqli_query($conn, $queryCounter);
     switch($criteria){
         case "Any":
-        case "Abstract":
-            $query = "SELECT a.id,IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) as title, @num:=@num+1 as counter FROM _tblbib a
+            $query = "SELECT
+            a.id,
+            a.title,
+            a.type,
+            @num := @num + 1 AS counter
+            FROM  (SELECT 
+            a.id,
+            IF( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) AS title,     
+            'old' as type      
+            FROM _tblbib a
             LEFT JOIN tbl_title_rel b ON a.id = b.primaryID 
             LEFT JOIN tbl_title c ON c.titleID = b.titleID 
-            WHERE 1=1 AND a.marc LIKE ('%".$search."%') AND IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) != '' ";
+            WHERE 1=1 AND a.marc LIKE ('%".$search."%') AND IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) != ''
+            UNION
+            SELECT
+                a.primaryno as id,
+                SUBSTR(title,6) as title,
+                'new' as type
+            FROM
+                t_title a 
+                LEFT JOIN t_abstract b ON b.primaryno = a.primaryno
+                LEFT JOIN t_author c ON c.primaryno = b.primaryno
+                LEFT JOIN t_keyword d ON d.primaryno = a.primaryno
+                LEFT JOIN t_source e ON e.primaryno = a.primaryno
+                LEFT JOIN t_subject f ON f.primaryno = a.primaryno
+                WHERE 
+                (a.title LIKE ('%".$search."%')
+                    OR b.abstract LIKE ('%".$search."%')
+                    OR c.author LIKE ('%".$search."%')
+                    OR d.keyword LIKE ('%".$search."%')
+                    OR CONCAT(e.source_document,e.source_document_date,e.source_document_page) LIKE ('%".$search."%')
+                    OR f.subject LIKE ('%".$search."%'))
+		        GROUP BY a.primaryno
+                ) a
+             ";
             $search_params = "anysearch";
         break;
+        case "Abstract":
+            $query = "SELECT
+            a.id,
+            a.title,
+            a.type,
+            @num := @num + 1 AS counter 
+        FROM
+            (
+            SELECT
+                a.id,
+            IF
+                ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) AS title,
+                'old' as type
+            FROM
+                _tblbib a
+                LEFT JOIN tbl_title_rel b ON a.id = b.primaryID
+                LEFT JOIN tbl_title c ON c.titleID = b.titleID 
+            WHERE
+                1 = 1 
+                AND a.marc LIKE ('%".$search."%')
+            AND
+            IF
+            ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) != '' 
+            UNION
+            SELECT 
+            a.primaryno,
+          SUBSTR(a.title,6) as title,
+            'new' as type
+            FROM
+             t_title a
+             LEFT JOIN t_abstract b ON b.primaryno = a.primaryno
+             WHERE
+             b.abstract LIKE ('%".$search."%')
+             GROUP BY a.primaryno
+            ) a
+            ";
+            $search_params = "abstractsearch";
+        break;
         case "Author":
-            $query = "SELECT id, title,@num:=@num+1 as counter
-            FROM (
-            SELECT a.id,IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) as title FROM _tblbib a
-            LEFT JOIN tbl_title_rel b ON a.id = b.primaryID 
-            LEFT JOIN tbl_title c ON c.titleID = b.titleID 
-            LEFT JOIN tbl_author_rel d ON d.primaryID = a.id
-            LEFT JOIN tbl_author e ON e.authorID = d.authorID
-            WHERE 1=1 AND e.author LIKE ('%".$search."%') AND IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) != ''
-            GROUP BY c.title ) a  ";
+            $query = "SELECT
+            id,
+            title,
+            type,
+            @num := @num + 1 AS counter 
+        FROM
+            (
+            SELECT
+                a.id,
+            IF
+                ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) AS title,
+                'old' AS type 
+            FROM
+                _tblbib a
+                LEFT JOIN tbl_title_rel b ON a.id = b.primaryID
+                LEFT JOIN tbl_title c ON c.titleID = b.titleID
+                LEFT JOIN tbl_author_rel d ON d.primaryID = a.id
+                LEFT JOIN tbl_author e ON e.authorID = d.authorID 
+            WHERE
+                1 = 1 
+                AND e.author LIKE ('%".$search."%')
+            AND
+            IF
+                ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) != '' 
+            GROUP BY
+                c.title UNION
+            SELECT
+                a.primaryno,
+                SUBSTR( a.title, 6 ) AS title,
+                'new' AS type 
+            FROM
+                t_title a
+                LEFT JOIN t_author b ON b.primaryno = a.primaryno 
+            WHERE
+                b.author LIKE ('%".$search."%')
+            GROUP BY
+            a.primaryno 
+            ) a  ";
+            // die($query);
             $search_params = "authorsearch";
         break;
         case "Title":
-            $query = "SELECT a.id,IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) as title, @num:=@num+1 as counter FROM _tblbib a
-                LEFT JOIN tbl_title_rel b ON a.id = b.primaryID 
+            $query = "SELECT
+            id,
+            title,
+            type,
+            @num := @num + 1 AS counter 
+        FROM
+            (
+            SELECT
+                a.id,
+            IF
+                ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) AS title,
+                'old' AS type 
+            FROM
+                _tblbib a
+                LEFT JOIN tbl_title_rel b ON a.id = b.primaryID
                 LEFT JOIN tbl_title c ON c.titleID = b.titleID 
-                WHERE 1=1 AND c.title LIKE ('%".$search."%') AND IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) != '' ";
+            WHERE
+                1 = 1 
+                AND c.title LIKE ('%".$search."%')
+            AND
+            IF
+                ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) != '' UNION
+            SELECT
+                a.primaryno,
+                SUBSTR( a.title, 6 ) AS title,
+                'new' AS type 
+            FROM
+                t_title a 
+            WHERE
+            a.title LIKE ('%".$search."%')
+            ) a";
             $search_params = "titlesearch";
         break;
         case "Subject":
-            $query = "SELECT id, title, @num:=@num+1 as counter FROM (
-            SELECT a.id,IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) as title FROM _tblbib a
-            LEFT JOIN tbl_title_rel b ON a.id = b.primaryID 
-            LEFT JOIN tbl_title c ON c.titleID = b.titleID 
-            LEFT JOIN tbl_subject_rel d ON d.primaryID = a.id
-            LEFT JOIN tbl_subject e ON e.subjectID = d.subjectID
-            WHERE 1=1 AND e.subject LIKE ('%".$search."%') AND IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) != ''
-            GROUP BY c.title ) a ";
+            $query = "SELECT
+            id,
+            title,
+            type,
+            @num := @num + 1 AS counter 
+        FROM
+            (
+            SELECT
+                a.id,
+            IF
+                ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) AS title,
+                'old' AS type 
+            FROM
+                _tblbib a
+                LEFT JOIN tbl_title_rel b ON a.id = b.primaryID
+                LEFT JOIN tbl_title c ON c.titleID = b.titleID
+                LEFT JOIN tbl_subject_rel d ON d.primaryID = a.id
+                LEFT JOIN tbl_subject e ON e.subjectID = d.subjectID 
+            WHERE
+                1 = 1 
+                AND e.SUBJECT LIKE ('%".$search."%')
+            AND
+            IF
+                ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) != '' 
+            GROUP BY
+                c.title UNION
+            SELECT
+                a.primaryno,
+                SUBSTR( a.title, 6 ) AS title,
+                'new' AS type 
+            FROM
+                t_title a
+                LEFT JOIN t_subject b ON b.primaryno = a.primaryno 
+            WHERE
+                b.`subject` LIKE ('%".$search."%')
+            GROUP BY
+            a.primaryno 
+            ) a ";
             $search_params = "subjectsearch";
         break;
         // case "Abstract":
@@ -171,10 +326,14 @@ function searchAllDB($search,$criteria){
     $result = mysqli_query($conn, $query);
     $keyword = isset($_POST['search']) ? $_POST['search'] : "";
     while($rowsauthorID = mysqli_fetch_array($result)){
+        $link = $rowsauthorID['type'] == 'old' ? 
+        "anysearch.php?id=".$rowsauthorID['id']."&keyword=".$keyword."&counter=".$rowsauthorID['counter']."&search=".$search_params."&type=".$rowsauthorID['type'].""
+         :
+         "anysearch_new.php?id=".$rowsauthorID['id']."&keyword=".$keyword."&counter=".$rowsauthorID['counter']."&search=".$search_params."&type=".$rowsauthorID['type'].""; 
         $output .= "<tr>
                         <td style='width:10%'>".$rowsauthorID['counter']."</td>
                         <td>".$rowsauthorID['title']."</td>
-                        <td><a href='anysearch.php?id=".$rowsauthorID['id']."&keyword=".$keyword."&counter=".$rowsauthorID['counter']."&search=".$search_params."' target='_blank' class='btn btn-danger' style='border-radius:0px;width:100%'>View</a></td>
+                        <td><a href='".$link."' target='_blank' class='btn btn-danger' style='border-radius:0px;width:100%'>View</a></td>
                     </tr>";
     }
      return $output;

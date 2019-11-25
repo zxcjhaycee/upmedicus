@@ -142,7 +142,7 @@ if(isset($_POST['show'])){
                             echo '<tr class="abstract">
                              <td><input type="checkbox" name="" class="form-control checkcontrolnumber"  data-id="abstract"></td>
                              <td><button type="button" class="btn btn-info btn-mini" href="#view" data-target="#abstractview" data-toggle="modal"><i class="icon-small icon-fullscreen"></i></button>&nbsp; ABSTRACT</td>
-                             <td><input type="text" name="abstractdelimeter" value="#"></td>
+                             <td><input type="text" name="abstractdelimeter[]" value="#"></td>
                              <td><input type="text" name="abstractvalue[]" value="00$a"></td>
                              <td><textarea class="form-control" name="abstract[]" rows="5" style="resize: none; width: 95%;"></textarea></td>
                            </tr>';

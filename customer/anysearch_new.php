@@ -15,57 +15,205 @@ switch($search){
     // $search_query = "a.marc LIKE ('%".$keyword."%')";
     // $join = "";
     // $group = "";
-    $query = "SELECT a.id,IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) as title, @num:=@num+1 as counter FROM _tblbib a
+    $query = "SELECT
+    a.id,
+    a.title,
+    a.type,
+    @num := @num + 1 AS counter
+    FROM  (SELECT 
+    a.id,
+    IF( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) AS title,     
+    'old' as type      
+    FROM _tblbib a
     LEFT JOIN tbl_title_rel b ON a.id = b.primaryID 
     LEFT JOIN tbl_title c ON c.titleID = b.titleID 
-    WHERE 1=1 AND a.marc LIKE ('%".$keyword."%') AND IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) != '' ";
+    WHERE 1=1 AND a.marc LIKE ('%".$keyword."%') AND IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) != ''
+    UNION
+    SELECT
+        a.primaryno as id,
+        SUBSTR(title,6) as title,
+        'new' as type
+    FROM
+        t_title a 
+        LEFT JOIN t_abstract b ON b.primaryno = a.primaryno
+        LEFT JOIN t_author c ON c.primaryno = b.primaryno
+        LEFT JOIN t_keyword d ON d.primaryno = a.primaryno
+        LEFT JOIN t_source e ON e.primaryno = a.primaryno
+        LEFT JOIN t_subject f ON f.primaryno = a.primaryno
+        WHERE 
+        (a.title LIKE ('%".$keyword."%')
+            OR b.abstract LIKE ('%".$keyword."%')
+            OR c.author LIKE ('%".$keyword."%')
+            OR d.keyword LIKE ('%".$keyword."%')
+            OR CONCAT(e.source_document,e.source_document_date,e.source_document_page) LIKE ('%".$keyword."%')
+            OR f.subject LIKE ('%".$keyword."%'))
+        GROUP BY a.primaryno
+        ) a
+     ";
   break;
   case "abstractsearch":
     // $search_query = "a.marc LIKE ('%".$keyword."%')";
     // $join = "";
     // $group = "";
-    $query = "SELECT a.id,IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) as title, @num:=@num+1 as counter FROM _tblbib a
-    LEFT JOIN tbl_title_rel b ON a.id = b.primaryID 
-    LEFT JOIN tbl_title c ON c.titleID = b.titleID 
-    WHERE 1=1 AND a.marc LIKE ('%".$keyword."%') AND IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) != '' ";
+    $query = "SELECT
+    a.id,
+    a.title,
+    a.type,
+    @num := @num + 1 AS counter 
+FROM
+    (
+    SELECT
+        a.id,
+    IF
+        ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) AS title,
+        'old' as type
+    FROM
+        _tblbib a
+        LEFT JOIN tbl_title_rel b ON a.id = b.primaryID
+        LEFT JOIN tbl_title c ON c.titleID = b.titleID 
+    WHERE
+        1 = 1 
+        AND a.marc LIKE ('%".$keyword."%')
+    AND
+    IF
+    ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) != '' 
+    UNION
+    SELECT 
+    a.primaryno,
+  SUBSTR(a.title,6) as title,
+    'new' as type
+    FROM
+     t_title a
+     LEFT JOIN t_abstract b ON b.primaryno = a.primaryno
+     WHERE
+     b.abstract LIKE ('%".$keyword."%')
+     GROUP BY a.primaryno
+    ) a
+    ";
   break;
   case "authorsearch":
     // $search_query = "e.author LIKE ('%".$keyword."%')";
     // $join = "LEFT JOIN tbl_author_rel d ON d.primaryID = a.id
     //         LEFT JOIN tbl_author e ON e.authorID = d.authorID";
     // $group = "GROUP BY c.title";
-    $query = "SELECT id, title,@num:=@num+1 as counter
-    FROM (
-    SELECT a.id,IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) as title FROM _tblbib a
-    LEFT JOIN tbl_title_rel b ON a.id = b.primaryID 
-    LEFT JOIN tbl_title c ON c.titleID = b.titleID 
-    LEFT JOIN tbl_author_rel d ON d.primaryID = a.id
-    LEFT JOIN tbl_author e ON e.authorID = d.authorID
-    WHERE 1=1 AND e.author LIKE ('%".$keyword."%') AND IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) != ''
-    GROUP BY c.title ) a  ";
+    $query = "SELECT
+        id,
+        title,
+        type,
+        @num := @num + 1 AS counter 
+    FROM
+        (
+        SELECT
+            a.id,
+        IF
+            ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) AS title,
+            'old' AS type 
+        FROM
+            _tblbib a
+            LEFT JOIN tbl_title_rel b ON a.id = b.primaryID
+            LEFT JOIN tbl_title c ON c.titleID = b.titleID
+            LEFT JOIN tbl_author_rel d ON d.primaryID = a.id
+            LEFT JOIN tbl_author e ON e.authorID = d.authorID 
+        WHERE
+            1 = 1 
+            AND e.author LIKE ('%".$search."%')
+        AND
+        IF
+            ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) != '' 
+        GROUP BY
+            c.title UNION
+        SELECT
+            a.primaryno,
+            SUBSTR( a.title, 6 ) AS title,
+            'new' AS type 
+        FROM
+            t_title a
+            LEFT JOIN t_author b ON b.primaryno = a.primaryno 
+        WHERE
+            b.author LIKE ('%".$search."%')
+        GROUP BY
+        a.primaryno 
+        ) a  ";
   break;
   case "titlesearch":
     // $search_query = "c.title LIKE ('%".$keyword."%')";
     // $join = "";
     // $group = "";
-    $query = "SELECT a.id,IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) as title, @num:=@num+1 as counter FROM _tblbib a
-    LEFT JOIN tbl_title_rel b ON a.id = b.primaryID 
-    LEFT JOIN tbl_title c ON c.titleID = b.titleID 
-    WHERE 1=1 AND c.title LIKE ('%".$keyword."%') AND IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) != '' ";
+        $query = "SELECT
+        id,
+        title,
+        type,
+        @num := @num + 1 AS counter 
+    FROM
+        (
+        SELECT
+            a.id,
+        IF
+            ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) AS title,
+            'old' AS type 
+        FROM
+            _tblbib a
+            LEFT JOIN tbl_title_rel b ON a.id = b.primaryID
+            LEFT JOIN tbl_title c ON c.titleID = b.titleID 
+        WHERE
+            1 = 1 
+            AND c.title LIKE ('%".$search."%')
+        AND
+        IF
+            ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) != '' UNION
+        SELECT
+            a.primaryno,
+            SUBSTR( a.title, 6 ) AS title,
+            'new' AS type 
+        FROM
+            t_title a 
+        WHERE
+        a.title LIKE ('%".$search."%')
+        ) a";
   break;
   case "subjectsearch":
     // $search_query = "e.subject LIKE ('%".$keyword."%')";
     // $join = "LEFT JOIN tbl_subject_rel d ON d.primaryID = a.id
     // LEFT JOIN tbl_subject e ON e.subjectID = d.subjectID";
     // $group = "GROUP BY c.title";
-    $query = "SELECT id, title, @num:=@num+1 as counter FROM (
-      SELECT a.id,IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) as title FROM _tblbib a
-      LEFT JOIN tbl_title_rel b ON a.id = b.primaryID 
-      LEFT JOIN tbl_title c ON c.titleID = b.titleID 
-      LEFT JOIN tbl_subject_rel d ON d.primaryID = a.id
-      LEFT JOIN tbl_subject e ON e.subjectID = d.subjectID
-      WHERE 1=1 AND e.subject LIKE ('%".$keyword."%') AND IF(LEFT(c.title,1)='',SUBSTR(c.title,4), c.title) != ''
-      GROUP BY c.title ) a ";
+    $query = "SELECT
+            id,
+            title,
+            type,
+            @num := @num + 1 AS counter 
+        FROM
+            (
+            SELECT
+                a.id,
+            IF
+                ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) AS title,
+                'old' AS type 
+            FROM
+                _tblbib a
+                LEFT JOIN tbl_title_rel b ON a.id = b.primaryID
+                LEFT JOIN tbl_title c ON c.titleID = b.titleID
+                LEFT JOIN tbl_subject_rel d ON d.primaryID = a.id
+                LEFT JOIN tbl_subject e ON e.subjectID = d.subjectID 
+            WHERE
+                1 = 1 
+                AND e.SUBJECT LIKE ('%".$search."%')
+            AND
+            IF
+                ( LEFT ( c.title, 1 ) = '', SUBSTR( c.title, 4 ), c.title ) != '' 
+            GROUP BY
+                c.title UNION
+            SELECT
+                a.primaryno,
+                SUBSTR( a.title, 6 ) AS title,
+                'new' AS type 
+            FROM
+                t_title a
+                LEFT JOIN t_subject b ON b.primaryno = a.primaryno 
+            WHERE
+                b.`subject` LIKE ('%".$search."%')
+            GROUP BY
+            a.primaryno 
+            ) a ";
   break;
 
 }
@@ -106,55 +254,110 @@ while($row = mysqli_fetch_array($result)){
   }
 }
 // var_dump($idAll);
+if($_GET['type'] == 'old'){
+    $queryMarc = "SELECT marc FROM _tblbib WHERE id = '$id'";
+    $resultMarc = mysqli_query($conn, $queryMarc);
+    $rowMarc = mysqli_fetch_array($resultMarc);
+    $content = $rowMarc['marc'];
+    $content = str_replace(array(">","<","\"")," ",$content); 
+    $ExplodeMarc = explode(chr(30),$content); 
+    $DataFields = substr($content,(strlen($ExplodeMarc[0])+1),strlen($content));
+    $DataFields = explode(chr(31),$DataFields);
+    $DataFields = implode("$",$DataFields);       
+    $DataFields = explode(chr(30),$DataFields);       
+    $value = $DataFields;
+    $MarcFieldsCount = (((strlen($ExplodeMarc[0])-24)/12)-1);
+    $MarcFieldsData = substr($ExplodeMarc[0],24,strlen($ExplodeMarc[0]));     
+    $tag = array();
+    $values = array();
+    $number = 0;
+    $i = 0;
+    
+    while ( $i <= $MarcFieldsCount) { 
+      $tag[$i] = substr($MarcFieldsData,$number,3);
+      $number = $number + 12;
+      $values[$i] = stripslashes($value[$i]); 
+      $i++;
+    }
+    // var_dump($tag);
+    // var_dump($values[]);
+    
+    $queryTitle = "SELECT IF(LEFT(a.title,1)='',SUBSTR(a.title,4), a.title) as title,a.language,a.encoder,a.mattype,a.phyclass FROM tbl_title a 
+    INNER JOIN tbl_title_rel b ON a.titleID = b.titleID
+     WHERE b.primaryID = '$id' AND IF(LEFT(a.title,1)='',SUBSTR(a.title,4), a.title) != '' ";
+    $resultTitle = mysqli_query($conn, $queryTitle);
+    $rowTitle = mysqli_fetch_array($resultTitle);
+    
+    // $queryAbstract = "SELECT IF(LEFT(a.abstract,1)='',SUBSTR(a.abstract,4), a.abstract) as abstract FROM tbl_abstract a 
+    // INNER JOIN tbl_abstract_rel b ON a.abstractID = b.abstractID WHERE b.primaryID = '$id' AND IF(LEFT(a.abstract,1)='',SUBSTR(a.abstract,4), a.abstract) != '' ";
+    // $resultAbstract = mysqli_query($conn, $queryAbstract);
+    
+    $queryAuthor = "SELECT IF(LEFT(a.author,1)='',SUBSTR(a.author,4), a.author) as author FROM tbl_author a 
+    INNER JOIN tbl_author_rel b ON a.authorID = b.authorID WHERE b.primaryID = '$id' AND IF(LEFT(a.author,1)='',SUBSTR(a.author,4), a.author) != '' ";
+    $resultAuthor = mysqli_query($conn, $queryAuthor);
+    
+    $queryPublisher = "SELECT IF(LEFT(a.publisher,1)='',SUBSTR(a.publisher,4), a.publisher) as publisher FROM tbl_publisher a 
+    INNER JOIN tbl_publisher_rel b ON a.publisherID = b.publisherID WHERE b.primaryID = '$id' AND IF(LEFT(a.publisher,1)='',SUBSTR(a.publisher,4), a.publisher) != '' ";
+    $resultPublisher = mysqli_query($conn, $queryPublisher);
+    
+    $querySubject = "SELECT IF(LEFT(a.`subject`,1)='',SUBSTR(a.`subject` ,4), a.`subject` ) as `subject` FROM tbl_subject a 
+    INNER JOIN tbl_subject_rel b ON a.subjectID = b.subjectID WHERE b.primaryID = '$id' AND IF(LEFT(a.subject,1)='',SUBSTR(a.subject,4), a.subject) != '' ";
+    $resultSubject = mysqli_query($conn, $querySubject);    
+}else{
+    $queryTitle = " SELECT
+                    a.primaryno,
+                    SUBSTR( a.title, 6) AS title,
+                    SUBSTR(b.encoder, 6) as encoder
+                FROM
+                    t_title a 
+                    LEFT JOIN t_encoder b ON b.primaryno = a.primaryno
+                WHERE
+                    a.primaryno = '$id'";
+    $resultTitle = mysqli_query($conn, $queryTitle);
+    $rowTitle = mysqli_fetch_array($resultTitle);
 
-$queryMarc = "SELECT marc FROM _tblbib WHERE id = '$id'";
-$resultMarc = mysqli_query($conn, $queryMarc);
-$rowMarc = mysqli_fetch_array($resultMarc);
-$content = $rowMarc['marc'];
-$content = str_replace(array(">","<","\"")," ",$content); 
-$ExplodeMarc = explode(chr(30),$content); 
-$DataFields = substr($content,(strlen($ExplodeMarc[0])+1),strlen($content));
-$DataFields = explode(chr(31),$DataFields);
-$DataFields = implode("$",$DataFields);       
-$DataFields = explode(chr(30),$DataFields);       
-$value = $DataFields;
-$MarcFieldsCount = (((strlen($ExplodeMarc[0])-24)/12)-1);
-$MarcFieldsData = substr($ExplodeMarc[0],24,strlen($ExplodeMarc[0]));     
-$tag = array();
-$values = array();
-$number = 0;
-$i = 0;
+    $queryAuthor = "SELECT 
+                    primaryno,
+                    SUBSTR(author, 6) as author
+                    FROM t_author
+                    WHERE primaryno = '$id'";
+    $resultAuthor = mysqli_query($conn, $queryAuthor);
 
-while ( $i <= $MarcFieldsCount) { 
-  $tag[$i] = substr($MarcFieldsData,$number,3);
-  $number = $number + 12;
-  $values[$i] = stripslashes($value[$i]); 
-  $i++;
+    $queryPublisher = "SELECT
+                        primaryno,
+                        CONCAT(SUBSTR(source_document,6), SUBSTR(source_document_date,6), SUBSTR(source_document_page,6)) as publisher
+                        FROM t_source
+                        WHERE primaryno = '$id'";
+    $resultPublisher = mysqli_query($conn, $queryPublisher);
+
+    $queryPhysicalClassification = "SELECT
+                                    primaryno,
+                                    SUBSTR(phyclass,6) as phyclass
+                                    FROM t_phyclass
+                                    WHERE primaryno = '$id'";
+    $resultPhysicalClassification = mysqli_query($conn, $queryPhysicalClassification);
+    
+    $queryLanguage = "SELECT 
+                        primaryno,
+                        SUBSTR(`language`, 6) as `language`
+                        FROM t_language
+                        WHERE primaryno = '$id'";
+    $resultLanguage = mysqli_query($conn, $queryLanguage);
+
+    $querySubject = "SELECT
+                        primaryno,
+                        SUBSTR(`subject`, 6) as `subject`
+                        FROM t_subject
+                        WHERE primaryno = '$id'";
+    $resultSubject = mysqli_query($conn, $querySubject);
+
+    $queryAbstract = "SELECT
+                        primaryno,
+                        SUBSTR(abstract, 6) as abstract
+                        FROM t_abstract
+                        WHERE primaryno = '$id'";
+    $resultAbstract = mysqli_query($conn, $queryAbstract);
 }
-// var_dump($tag);
-// var_dump($values[]);
-
-$queryTitle = "SELECT IF(LEFT(a.title,1)='',SUBSTR(a.title,4), a.title) as title,a.language,a.encoder,a.mattype,a.phyclass FROM tbl_title a 
-INNER JOIN tbl_title_rel b ON a.titleID = b.titleID
- WHERE b.primaryID = '$id' AND IF(LEFT(a.title,1)='',SUBSTR(a.title,4), a.title) != '' ";
-$resultTitle = mysqli_query($conn, $queryTitle);
-$rowTitle = mysqli_fetch_array($resultTitle);
-
-// $queryAbstract = "SELECT IF(LEFT(a.abstract,1)='',SUBSTR(a.abstract,4), a.abstract) as abstract FROM tbl_abstract a 
-// INNER JOIN tbl_abstract_rel b ON a.abstractID = b.abstractID WHERE b.primaryID = '$id' AND IF(LEFT(a.abstract,1)='',SUBSTR(a.abstract,4), a.abstract) != '' ";
-// $resultAbstract = mysqli_query($conn, $queryAbstract);
-
-$queryAuthor = "SELECT IF(LEFT(a.author,1)='',SUBSTR(a.author,4), a.author) as author FROM tbl_author a 
-INNER JOIN tbl_author_rel b ON a.authorID = b.authorID WHERE b.primaryID = '$id' AND IF(LEFT(a.author,1)='',SUBSTR(a.author,4), a.author) != '' ";
-$resultAuthor = mysqli_query($conn, $queryAuthor);
-
-$queryPublisher = "SELECT IF(LEFT(a.publisher,1)='',SUBSTR(a.publisher,4), a.publisher) as publisher FROM tbl_publisher a 
-INNER JOIN tbl_publisher_rel b ON a.publisherID = b.publisherID WHERE b.primaryID = '$id' AND IF(LEFT(a.publisher,1)='',SUBSTR(a.publisher,4), a.publisher) != '' ";
-$resultPublisher = mysqli_query($conn, $queryPublisher);
-
-$querySubject = "SELECT IF(LEFT(a.`subject`,1)='',SUBSTR(a.`subject` ,4), a.`subject` ) as `subject` FROM tbl_subject a 
-INNER JOIN tbl_subject_rel b ON a.subjectID = b.subjectID WHERE b.primaryID = '$id' AND IF(LEFT(a.subject,1)='',SUBSTR(a.subject,4), a.subject) != '' ";
-$resultSubject = mysqli_query($conn, $querySubject);
 
 ?>
 	<!DOCTYPE html>
@@ -350,12 +553,13 @@ span.psw {
               <th style="width:15%">ENCODER</th>
               <td><?= $rowTitle['encoder'] ?></td>
             </tr>
-            <tr>
-                <th style="width:15%">PHYSICAL CLASSIFICATION</th>
-                <td><?= $rowTitle['phyclass'] ?></td>
-            </tr>
-
             <?php
+            if($_GET['type'] == 'old'){
+                echo"<tr>
+                    <th style='width:15%'>PHYSICAL CLASSIFICATION</th>
+                    <td> ".$rowTitle['phyclass']." </td>
+                </tr>";
+
               foreach($tag as $key => $value){
                 if($value == '011'){
                   echo"<tr>
@@ -364,11 +568,25 @@ span.psw {
                     </tr>";
                 }
               }
+              echo '<tr>
+              <th style="width:15%">LANGUAGE OF TEXT</th>
+              <td>'.$rowTitle['language'].'</td></tr>';
+            }else{
+                while($rowPhyClass = mysqli_fetch_array($resultPhysicalClassification)){
+                    echo"<tr>
+                            <th style='width:15%'>PHYSICAL CLASSIFICATION</th>
+                            <td> ".$rowPhyClass['phyclass']."</td>
+                        </tr>";
+                }
+                while($rowLanguage = mysqli_fetch_array($resultLanguage)){
+                    echo '<tr>
+                    <th style="width:15%">LANGUAGE OF TEXT</th>
+                    <td>'.$rowLanguage['language'].'</td></tr>';
+                }
+            }
             ?>
-            <tr>
-                <th style="width:15%">LANGUAGE OF TEXT</th>
-                <td><?= $rowTitle['language']; ?></td>
-            </tr>
+      
+      
             <?php
             while($rowSubject = mysqli_fetch_array($resultSubject)){
               echo "<tr>
@@ -376,15 +594,24 @@ span.psw {
                       <td>".$rowSubject['subject']."</td>
                   </tr>";
             }
-
-            foreach($tag as $key => $value){
-              if($value == '600'){
-                echo"<tr>
-                    <th style='width:15%'>ABSTRACT</th>
-                    <td>".str_replace("00\$a", "", $values[$key])."</td>
-                  </tr>";
-              }
+            if($_GET['type'] == 'old'){
+                foreach($tag as $key => $value){
+                    if($value == '600'){
+                        echo"<tr>
+                            <th style='width:15%'>ABSTRACT</th>
+                            <td>".str_replace("00\$a", "", $values[$key])."</td>
+                        </tr>";
+                    }
+                }
+            }else{
+                while($rowAbstract = mysqli_fetch_array($resultAbstract)){
+                    echo"<tr>
+                            <th style='width:15%'>ABSTRACT</th>
+                            <td>".$rowAbstract['abstract']."</td>
+                         </tr>";             
+                }
             }
+   
             ?>
             <tr>
           </table>
