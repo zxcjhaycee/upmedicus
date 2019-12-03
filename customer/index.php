@@ -327,7 +327,7 @@ function searchAllDB($search,$criteria){
     $keyword = isset($_POST['search']) ? $_POST['search'] : "";
     while($rowsauthorID = mysqli_fetch_array($result)){
         $link = $rowsauthorID['type'] == 'old' ? 
-        "anysearch.php?id=".$rowsauthorID['id']."&keyword=".$keyword."&counter=".$rowsauthorID['counter']."&search=".$search_params."&type=".$rowsauthorID['type'].""
+        "anysearch_new.php?id=".$rowsauthorID['id']."&keyword=".$keyword."&counter=".$rowsauthorID['counter']."&search=".$search_params."&type=".$rowsauthorID['type'].""
          :
          "anysearch_new.php?id=".$rowsauthorID['id']."&keyword=".$keyword."&counter=".$rowsauthorID['counter']."&search=".$search_params."&type=".$rowsauthorID['type'].""; 
         $output .= "<tr>

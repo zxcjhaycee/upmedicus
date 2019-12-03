@@ -307,7 +307,9 @@ if($_GET['type'] == 'old'){
     $queryTitle = " SELECT
                     a.primaryno,
                     SUBSTR( a.title, 6) AS title,
-                    SUBSTR(b.encoder, 6) as encoder
+                    title as title_marc,
+                    SUBSTR(b.encoder, 6) as encoder,
+                    encoder as encoder_marc
                 FROM
                     t_title a 
                     LEFT JOIN t_encoder b ON b.primaryno = a.primaryno
@@ -318,45 +320,75 @@ if($_GET['type'] == 'old'){
 
     $queryAuthor = "SELECT 
                     primaryno,
-                    SUBSTR(author, 6) as author
+                    SUBSTR(author, 6) as author,
+                    author as author_marc
                     FROM t_author
                     WHERE primaryno = '$id'";
     $resultAuthor = mysqli_query($conn, $queryAuthor);
+    $resultAuthorMarc = mysqli_query($conn, $queryAuthor);
 
     $queryPublisher = "SELECT
                         primaryno,
-                        CONCAT(SUBSTR(source_document,6), SUBSTR(source_document_date,6), SUBSTR(source_document_page,6)) as publisher
+                        CONCAT(SUBSTR(source_document,6), SUBSTR(source_document_date,6), SUBSTR(source_document_page,6)) as publisher,
+                        CONCAT(source_document,source_document_date,source_document_page) as publisher_marc
                         FROM t_source
                         WHERE primaryno = '$id'";
     $resultPublisher = mysqli_query($conn, $queryPublisher);
+    $resultPublisherMarc = mysqli_query($conn, $queryPublisher);
 
     $queryPhysicalClassification = "SELECT
                                     primaryno,
-                                    SUBSTR(phyclass,6) as phyclass
+                                    SUBSTR(phyclass,6) as phyclass,
+                                    phyclass as phyclass_marc
                                     FROM t_phyclass
                                     WHERE primaryno = '$id'";
     $resultPhysicalClassification = mysqli_query($conn, $queryPhysicalClassification);
+    $resultPhysicalClassificationMarc = mysqli_query($conn, $queryPhysicalClassification);
     
     $queryLanguage = "SELECT 
                         primaryno,
-                        SUBSTR(`language`, 6) as `language`
+                        SUBSTR(`language`, 6) as `language`,
+                        `language` as language_marc
                         FROM t_language
                         WHERE primaryno = '$id'";
     $resultLanguage = mysqli_query($conn, $queryLanguage);
+    $resultLanguageMarc = mysqli_query($conn, $queryLanguage);
 
     $querySubject = "SELECT
                         primaryno,
-                        SUBSTR(`subject`, 6) as `subject`
+                        SUBSTR(`subject`, 6) as `subject`,
+                        `subject` as subject_marc
                         FROM t_subject
                         WHERE primaryno = '$id'";
     $resultSubject = mysqli_query($conn, $querySubject);
+    $resultSubjectMarc = mysqli_query($conn, $querySubject);
 
     $queryAbstract = "SELECT
                         primaryno,
-                        SUBSTR(abstract, 6) as abstract
+                        SUBSTR(abstract, 6) as abstract,
+                        abstract as abstract_marc
                         FROM t_abstract
                         WHERE primaryno = '$id'";
     $resultAbstract = mysqli_query($conn, $queryAbstract);
+    $resultAbstractMarc = mysqli_query($conn, $queryAbstract);
+
+    $queryMaterial = "SELECT 
+                        primaryno,
+                        SUBSTR(mattype, 6) as mattype,
+                        mattype as mattype_marc
+                        FROM t_mattype
+                        WHERE primaryno = '$id'";
+    $resultMaterial = mysqli_query($conn, $queryMaterial);
+    $resultMaterialMarc = mysqli_query($conn, $queryMaterial);
+
+    $queryKeyword = "SELECT 
+                        primaryno,
+                        SUBSTR(keyword, 6) as keyword,
+                        keyword as keyword_marc
+                        FROM t_keyword
+                        WHERE primaryno = '$id'";
+    $resultKeyword = mysqli_query($conn, $queryKeyword);
+    $resultKeywordMarc = mysqli_query($conn, $queryKeyword);
 }
 
 ?>
@@ -553,15 +585,25 @@ span.psw {
               <th style="width:15%">ENCODER</th>
               <td><?= $rowTitle['encoder'] ?></td>
             </tr>
+
             <?php
             if($_GET['type'] == 'old'){
-                echo"<tr>
-                    <th style='width:15%'>PHYSICAL CLASSIFICATION</th>
-                    <td> ".$rowTitle['phyclass']." </td>
-                </tr>";
+            foreach($tag as $key => $value){
+                if($value == '011'){
+                    echo "<tr>
+                            <th>TYPE OF MATERIAL/DOCUMENT</th>
+                            <td>".str_replace("00\$a", "", $values[$key])."</td>
+                         </tr>";
+                }
+            
+            }
+                // echo"<tr>
+                //     <th style='width:15%'>PHYSICAL CLASSIFICATION</th>
+                //     <td> ".$rowTitle['phyclass']." </td>
+                // </tr>";
 
               foreach($tag as $key => $value){
-                if($value == '011'){
+                if($value == '007'){
                   echo"<tr>
                       <th style='width:15%'>PHYSICAL CLASSIFICATION</th>
                       <td>".str_replace("00\$a", "", $values[$key])."</td>
@@ -572,6 +614,12 @@ span.psw {
               <th style="width:15%">LANGUAGE OF TEXT</th>
               <td>'.$rowTitle['language'].'</td></tr>';
             }else{
+                while($rowMaterial = mysqli_fetch_array($resultMaterial)){
+                    echo "<tr>
+                            <th>TYPE OF MATERIAL/DOCUMENT</th>
+                            <td>".$rowMaterial['mattype']."</td>
+                        </tr>";
+                }
                 while($rowPhyClass = mysqli_fetch_array($resultPhysicalClassification)){
                     echo"<tr>
                             <th style='width:15%'>PHYSICAL CLASSIFICATION</th>
@@ -596,6 +644,12 @@ span.psw {
             }
             if($_GET['type'] == 'old'){
                 foreach($tag as $key => $value){
+                    if($value == '630'){
+                        echo"<tr>
+                        <th style='width:15%'>KEYWORDS(NON-MESH)</th>
+                        <td>".str_replace("00\$a", "", $values[$key])."</td>
+                    </tr>";
+                    }
                     if($value == '600'){
                         echo"<tr>
                             <th style='width:15%'>ABSTRACT</th>
@@ -604,6 +658,12 @@ span.psw {
                     }
                 }
             }else{
+                while($rowKeyword = mysqli_fetch_array($resultKeyword)){
+                    echo"<tr>
+                    <th style='width:15%'>KEYWORDS(NON-MESH)</th>
+                    <td>".$rowKeyword['keyword']."</td>
+                 </tr>";     
+                }
                 while($rowAbstract = mysqli_fetch_array($resultAbstract)){
                     echo"<tr>
                             <th style='width:15%'>ABSTRACT</th>
@@ -621,70 +681,133 @@ span.psw {
           <br/>
           <table class="table table-striped table-bordered" style="width:100%">
               <?php
-              foreach($tag as $key => $value){
-                switch($value){
-                  case "210":
-                    echo "<tr>
-                      <th>ENGLISH TITLE</th>
-                      <td>".$values[$key]."</td>
-                    </tr>"; 
-                  break;
-                  case "100":
-                    echo "<tr>
-                        <th>PERSONAL AUTHOR(S)</th>
-                        <td>".$values[$key]."</td>
-                      </tr>";
-                  break;
-                  case "490":
-                    echo "<tr>
-                          <th>SOURCE DOCUMENT</th>
+              if($_GET['type'] == 'old'){
+                foreach($tag as $key => $value){
+                    switch($value){
+                      case "210":
+                        echo "<tr>
+                          <th>ENGLISH TITLE</th>
                           <td>".$values[$key]."</td>
+                        </tr>"; 
+                      break;
+                      case "100":
+                        echo "<tr>
+                            <th>PERSONAL AUTHOR(S)</th>
+                            <td>".$values[$key]."</td>
                           </tr>";
-                  break;
-                  case "800":
-                      echo "<tr>
-                        <th>ENCODER</th>
+                      break;
+                      case "490":
+                        echo "<tr>
+                              <th>SOURCE DOCUMENT</th>
+                              <td>".$values[$key]."</td>
+                              </tr>";
+                      break;
+                      case "800":
+                          echo "<tr>
+                            <th>ENCODER</th>
+                            <td>".$values[$key]."</td>
+                          </tr>";
+                      break;
+                      case "011":
+                        echo "<tr>
+                          <th>TYPE OF MATERIAL/DOCUMENT</th>
+                          <td>".$values[$key]."</td>
+                        </tr>";
+                      break;
+                      case "007":
+                        echo "<tr>
+                            <th>PHYSICAL CLASSIFICATION</th>
+                            <td>".$values[$key]."</td>
+                         </tr>";
+                      break;
+                      case "012":
+                        echo "<tr>
+                          <th>LANGUAGE OF TEXT</th>
+                          <td>".$values[$key]."</td>
+                        </tr>";
+                      break;
+                      case "620":
+                        echo "<tr>
+                          <th>SUBJECT HEADINGS(MESH)</th>
+                          <td>".$values[$key]."</td>
+                        </tr>";
+                      break;
+                      case "630":
+                        echo "<tr>
+                        <th>KEYWORDS(NON-MESH)</th>
                         <td>".$values[$key]."</td>
-                      </tr>";
-                  break;
-                  case "011":
-                    echo "<tr>
-                      <th>TYPE OF MATERIAL/DOCUMENT</th>
-                      <td>".$values[$key]."</td>
+                        </tr>";
+                      break;
+                      case "600":
+                        echo "<tr>
+                          <th>ABSTRACT</th>
+                          <td>".$values[$key]."</td>
+                        </tr>";
+                      break;
+                    }
+                  }
+              }else{
+                  echo "
+                    <tr>
+                        <th style='width:15%'>ENGLISH TITLE</th>
+                        <td>".$rowTitle['title_marc']."</td>
                     </tr>";
-                  break;
-                  case "620":
+
+                while($rowAuthorMarc = mysqli_fetch_array($resultAuthorMarc)){
                     echo "<tr>
-                      <th>SUBJECT HEADINGS(MESH)</th>
-                      <td>".$values[$key]."</td>
+                            <th style='width:15%'>PERSONAL AUTHOR(S)</th>
+                            <td>".$rowAuthorMarc['author_marc']."</td>
+                            </tr>";
+                    }
+                while($rowPublisherMarc = mysqli_fetch_array($resultPublisherMarc)){
+                    echo "<tr>
+                            <th style='width:15%'>SOURCE DOCUMENT</th>
+                            <td>".$rowPublisherMarc['publisher_marc']."</td>
+                            </tr>";
+                    }
+                    echo "
+                    <tr>
+                        <th style='width:15%'>ENCODER</th>
+                        <td>".$rowTitle['encoder_marc']."</td>
                     </tr>";
-                  break;
-                  case "007":
-                    echo "<tr>
-                        <th>PHYSICAL CLASSIFICATION</th>
-                        <td>".$values[$key]."</td>
-                     </tr>";
-                  break;
-                  case "012":
-                    echo "<tr>
-                      <th>LANGUAGE OF TEXT</th>
-                      <td>".$values[$key]."</td>
-                    </tr>";
-                  break;
-                  case "630":
-                    echo "<tr>
-                    <th>KEYWORDS(NON-MESH)</th>
-                    <td>".$values[$key]."</td>
-                    </tr>";
-                  break;
-                  case "600":
-                    echo "<tr>
-                      <th>ABSTRACT</th>
-                      <td>".$values[$key]."</td>
-                    </tr>";
-                  break;
-                }
+                    while($rowMaterialMarc = mysqli_fetch_array($resultMaterialMarc)){
+                        echo "<tr>
+                                <th>TYPE OF MATERIAL/DOCUMENT</th>
+                                <td>".$rowMaterialMarc['mattype_marc']."</td>
+                            </tr>";
+                    }
+                    while($rowPhyClassMarc = mysqli_fetch_array($resultPhysicalClassificationMarc)){
+                        echo"<tr>
+                                <th style='width:15%'>PHYSICAL CLASSIFICATION</th>
+                                <td> ".$rowPhyClassMarc['phyclass_marc']."</td>
+                            </tr>";
+                    }
+                    while($rowLanguageMarc = mysqli_fetch_array($resultLanguageMarc)){
+                        echo '<tr>
+                        <th style="width:15%">LANGUAGE OF TEXT</th>
+                        <td>'.$rowLanguageMarc['language_marc'].'</td></tr>';
+                    }
+                    while($rowSubjectMarc = mysqli_fetch_array($resultSubjectMarc)){
+                        echo "<tr>
+                                <th style='width:15%'>SUBJECT HEADINGS(MESH)</th>
+                                <td>".$rowSubjectMarc['subject_marc']."</td>
+                            </tr>";
+                      }
+
+                    while($rowKeywordMarc = mysqli_fetch_array($resultKeywordMarc)){
+                        echo"<tr>
+                                <th style='width:15%'>KEYWORDS(NON-MESH)</th>
+                                <td>".$rowKeywordMarc['keyword_marc']."</td>
+                            </tr>";     
+                    }
+                    while($rowAbstractMarc = mysqli_fetch_array($resultAbstractMarc)){
+                        echo"<tr>
+                                <th style='width:15%'>ABSTRACT</th>
+                                <td>".$rowAbstractMarc['abstract_marc']."</td>
+                            </tr>";             
+                    }
               }
+            
               ?>
 
           </table>
