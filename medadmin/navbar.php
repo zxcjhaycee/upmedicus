@@ -59,16 +59,16 @@
           } 
            */
           echo '<a href="cataloging.php"><i class="icon-book"></i><span>Cataloging</span></a></li>';
-        
-         echo $title == 'Messages' ? '<li class="active">' : '<li>';
           /*          
+
+         echo $title == 'Messages' ? '<li class="active">' : '<li>';
           if($title=="Reports"){ 
             echo '<li class="active">'; }
           else {
            echo "<li>";
           } 
-          */
           echo '<a href="messages.php"><i class="icon-envelope"></i><span>Messages</span></a></li>';
+          */
 
           echo $title == 'Profile' ? '<li class="active">' : '<li>';
           /*         
@@ -79,6 +79,16 @@
           } 
           */
           echo '<a href="profile.php"><i class="icon-cogs"></i><span>Profile</span></a></li>';
+
+          echo $title == 'Search' ? '<li class="active">' : '<li>';
+          /*         
+          if($title=="Profile"){ 
+           echo '<li class="active">'; }
+          else {
+           echo "<li>";
+          } 
+          */
+          echo '<a href="../customer/index.php"><i class="icon-search"></i><span>Search</span></a></li>';
 
           echo $title == 'Logout' ? '<li class="active">' : '<li>';
           /* 

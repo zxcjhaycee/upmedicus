@@ -181,14 +181,27 @@ span.psw {
                 <li id="home" style="cursor:pointer">
                    <a href='inquiry.php'><i class="fa fa-phone fa-fw"></i> Inquiry</a>
                 </li>
-
-                
+                <?php
+                if(isset($_SESSION['usertype']) && $_SESSION['usertype'] == 'Admin'){
+                  echo '<li id="home" style="cursor:pointer">
+                          <a href="../medadmin/index.php"><i class="fa fa-dashboard fa-fw"></i>Dashboard</a>
+                       </li>';
+                }
+                ?>
+              
 
             </ul>
             
             <ul class="nav navbar-top-links navbar-right">
-                <li id="home" style="cursor:pointer">
-                <a href='register.php' style="width:auto;"> <i class="fa fa-user fa-fw"></i>Login</a>
+                <li id="home" style="margin-right:15px;margin-top:5px">
+                <?php
+                // var_dump($_SESSION);
+                if(isset($_SESSION['usertype']) && $_SESSION['usertype'] == 'Admin'){
+                  echo '<a href="#" style="width:auto;"><i class="fa fa-user fa-fw"></i>Welcome, '.ucwords($_SESSION['username']).' </a>';
+                }else{
+                  echo '<a href="login.php" style="width:auto;"> <i class="fa fa-user fa-fw"></i>Login</a>';
+                }
+                ?>
                    <!-- <a onclick="document.getElementById('id01').style.display='block'" id="trypamore" style="width:auto;"> <i class="fa fa-user fa-fw"></i>Login</a> -->
                 </li>
                 
